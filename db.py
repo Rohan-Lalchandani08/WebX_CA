@@ -2,7 +2,8 @@ import logging
 import json
 import os
 from datetime import datetime
-from models import (User, Trip, ItineraryDay, Destination, TravelTip, Review, Expense)
+from models import (User, Trip, ItineraryDay, Destination, TravelTip, Review, Expense,
+                   JournalEntry, TripInvitation)
 from mongo_like import mongo
 
 # Convert datetime objects to strings for JSON serialization
@@ -339,3 +340,102 @@ def delete_itinerary(itinerary_id):
 def load_travel_tips():
     """Load travel tips from MongoDB (compatible with existing app)"""
     return get_all_travel_tips()
+
+# Journal Entry functions
+def get_trip_journal_entries(trip_id):
+    """Get all journal entries for a trip"""
+    entries = list(mongo.db.journal_entries.find({"trip_id": trip_id}))
+    for entry in entries:
+        entry['id'] = str(entry['_id'])
+    return entries
+
+def get_user_journal_entries(user_id):
+    """Get all journal entries by a user"""
+    entries = list(mongo.db.journal_entries.find({"user_id": user_id}))
+    for entry in entries:
+        entry['id'] = str(entry['_id'])
+    return entries
+
+def get_journal_entry_by_id(entry_id):
+    """Get a specific journal entry by ID"""
+    entry = mongo.db.journal_entries.find_one({"_id": entry_id})
+    if entry:
+        entry['id'] = str(entry['_id'])
+    return entry
+
+def create_journal_entry(entry):
+    """Create a new journal entry"""
+    entry_dict = entry.to_dict()
+    result = mongo.db.journal_entries.insert_one(entry_dict)
+    return str(result.inserted_id)
+
+def update_journal_entry(entry):
+    """Update an existing journal entry"""
+    entry_dict = entry.to_dict()
+    result = mongo.db.journal_entries.update_one({"_id": entry.id}, {"$set": entry_dict})
+    return result.modified_count > 0
+
+def delete_journal_entry(entry_id):
+    """Delete a journal entry by ID"""
+    result = mongo.db.journal_entries.delete_one({"_id": entry_id})
+    return result.deleted_count > 0
+
+# Trip Sharing & Invitation functions
+def get_trip_invitations(trip_id):
+    """Get all invitations for a trip"""
+    invitations = list(mongo.db.invitations.find({"trip_id": trip_id}))
+    for invitation in invitations:
+        invitation['id'] = str(invitation['_id'])
+    return invitations
+
+def get_user_invitations(user_email):
+    """Get all invitations sent to a user's email"""
+    invitations = list(mongo.db.invitations.find({
+        "email": user_email, 
+        "status": TripInvitation.STATUS_PENDING
+    }))
+    for invitation in invitations:
+        invitation['id'] = str(invitation['_id'])
+    return invitations
+
+def get_invitation_by_code(code):
+    """Get an invitation by its unique code"""
+    invitation = mongo.db.invitations.find_one({"invitation_code": code})
+    if invitation:
+        invitation['id'] = str(invitation['_id'])
+    return invitation
+
+def create_invitation(invitation):
+    """Create a new trip invitation"""
+    invitation_dict = invitation.to_dict()
+    result = mongo.db.invitations.insert_one(invitation_dict)
+    return str(result.inserted_id)
+
+def update_invitation(invitation):
+    """Update an existing invitation (e.g., to accept/decline)"""
+    invitation_dict = invitation.to_dict()
+    result = mongo.db.invitations.update_one({"_id": invitation.id}, {"$set": invitation_dict})
+    return result.modified_count > 0
+
+def get_shared_trips(user_id):
+    """Get all trips shared with a user"""
+    trips = list(mongo.db.trips.find({"shared_with": user_id}))
+    for trip in trips:
+        trip['id'] = str(trip['_id'])
+    return trips
+
+def add_user_to_shared_trip(trip_id, user_id):
+    """Add a user to a trip's shared_with list"""
+    result = mongo.db.trips.update_one(
+        {"_id": trip_id},
+        {"$addToSet": {"shared_with": user_id}}
+    )
+    return result.modified_count > 0
+
+def remove_user_from_shared_trip(trip_id, user_id):
+    """Remove a user from a trip's shared_with list"""
+    result = mongo.db.trips.update_one(
+        {"_id": trip_id},
+        {"$pull": {"shared_with": user_id}}
+    )
+    return result.modified_count > 0

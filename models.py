@@ -39,7 +39,8 @@ class User(UserMixin):
 class Trip:
     def __init__(self, id=None, title=None, user_id=None, destination_id=None, 
                  start_date=None, end_date=None, budget=None, notes=None, 
-                 created_at=None, is_public=False, companions=None):
+                 created_at=None, is_public=False, companions=None, 
+                 shared_with=None, sharing_enabled=False, budget_shared=False):
         self.id = id or str(uuid.uuid4())
         self.title = title
         self.user_id = user_id
@@ -51,6 +52,9 @@ class Trip:
         self.created_at = created_at or datetime.utcnow()
         self.is_public = is_public
         self.companions = companions or []
+        self.shared_with = shared_with or []  # List of user IDs who have access
+        self.sharing_enabled = sharing_enabled  # Enable group planning
+        self.budget_shared = budget_shared  # Whether budget is shared with group
         
     @classmethod
     def from_dict(cls, data):
@@ -67,7 +71,10 @@ class Trip:
             notes=data.get('notes'),
             created_at=data.get('created_at'),
             is_public=data.get('is_public', False),
-            companions=data.get('companions', [])
+            companions=data.get('companions', []),
+            shared_with=data.get('shared_with', []),
+            sharing_enabled=data.get('sharing_enabled', False),
+            budget_shared=data.get('budget_shared', False)
         )
     
     def to_dict(self):
@@ -82,7 +89,10 @@ class Trip:
             'notes': self.notes,
             'created_at': self.created_at,
             'is_public': self.is_public,
-            'companions': self.companions
+            'companions': self.companions,
+            'shared_with': self.shared_with,
+            'sharing_enabled': self.sharing_enabled,
+            'budget_shared': self.budget_shared
         }
 
 # Itinerary day model
@@ -271,4 +281,94 @@ class Review:
             'rating': self.rating,
             'comment': self.comment,
             'date': self.date
+        }
+
+# Travel Journal Entry model
+class JournalEntry:
+    def __init__(self, id=None, trip_id=None, user_id=None, date=None, title=None,
+                content=None, location=None, image_urls=None, mood=None, created_at=None):
+        self.id = id or str(uuid.uuid4())
+        self.trip_id = trip_id
+        self.user_id = user_id
+        self.date = date or datetime.now().strftime('%Y-%m-%d')
+        self.title = title
+        self.content = content
+        self.location = location
+        self.image_urls = image_urls or []
+        self.mood = mood
+        self.created_at = created_at or datetime.utcnow()
+    
+    @classmethod
+    def from_dict(cls, data):
+        if not data:
+            return None
+        return cls(
+            id=data.get('_id') or data.get('id'),
+            trip_id=data.get('trip_id'),
+            user_id=data.get('user_id'),
+            date=data.get('date'),
+            title=data.get('title'),
+            content=data.get('content'),
+            location=data.get('location'),
+            image_urls=data.get('image_urls', []),
+            mood=data.get('mood'),
+            created_at=data.get('created_at')
+        )
+    
+    def to_dict(self):
+        return {
+            '_id': self.id,
+            'trip_id': self.trip_id,
+            'user_id': self.user_id,
+            'date': self.date,
+            'title': self.title,
+            'content': self.content,
+            'location': self.location,
+            'image_urls': self.image_urls,
+            'mood': self.mood,
+            'created_at': self.created_at
+        }
+
+# Trip Invitation model
+class TripInvitation:
+    STATUS_PENDING = 'pending'
+    STATUS_ACCEPTED = 'accepted'
+    STATUS_DECLINED = 'declined'
+    
+    def __init__(self, id=None, trip_id=None, user_id=None, invited_by_id=None, 
+                email=None, status=None, invitation_code=None, created_at=None):
+        self.id = id or str(uuid.uuid4())
+        self.trip_id = trip_id
+        self.user_id = user_id  # Will be None until accepted
+        self.invited_by_id = invited_by_id
+        self.email = email
+        self.status = status or self.STATUS_PENDING
+        self.invitation_code = invitation_code or str(uuid.uuid4())
+        self.created_at = created_at or datetime.utcnow()
+    
+    @classmethod
+    def from_dict(cls, data):
+        if not data:
+            return None
+        return cls(
+            id=data.get('_id') or data.get('id'),
+            trip_id=data.get('trip_id'),
+            user_id=data.get('user_id'),
+            invited_by_id=data.get('invited_by_id'),
+            email=data.get('email'),
+            status=data.get('status'),
+            invitation_code=data.get('invitation_code'),
+            created_at=data.get('created_at')
+        )
+    
+    def to_dict(self):
+        return {
+            '_id': self.id,
+            'trip_id': self.trip_id,
+            'user_id': self.user_id,
+            'invited_by_id': self.invited_by_id,
+            'email': self.email,
+            'status': self.status,
+            'invitation_code': self.invitation_code,
+            'created_at': self.created_at
         }

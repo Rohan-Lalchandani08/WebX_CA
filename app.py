@@ -10,7 +10,7 @@ from config import SECRET_KEY
 from weather import get_weather_for_city
 from forms import (LoginForm, RegistrationForm, ResetPasswordRequestForm, 
                   ResetPasswordForm, TripForm, ActivityForm, ExpenseForm, ReviewForm)
-from models import User, Trip, Expense, Review
+from models import User, Trip, Expense, Review, JournalEntry, TripInvitation
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -28,7 +28,11 @@ from db import (load_destinations, get_destination_by_id,
                get_user_by_id, get_user_by_email, get_user_by_username,
                create_user, update_user, get_user_trips, get_trip_expenses, 
                create_trip, update_trip, create_expense, get_user_reviews, 
-               create_review)
+               create_review, get_trip_journal_entries, get_user_journal_entries,
+               get_journal_entry_by_id, create_journal_entry, update_journal_entry,
+               delete_journal_entry, get_trip_invitations, get_user_invitations,
+               get_invitation_by_code, create_invitation, update_invitation,
+               get_shared_trips, add_user_to_shared_trip, remove_user_from_shared_trip)
 
 @app.route('/')
 def index():
@@ -493,6 +497,365 @@ def add_expense():
     
     flash('Error adding expense. Please check your inputs.', 'danger')
     return redirect(url_for('dashboard'))
+
+# Travel Journal Routes
+@app.route('/trips/<trip_id>/journal')
+@login_required
+def trip_journal(trip_id):
+    # Get the trip
+    trip = get_trip_by_id(trip_id)
+    if not trip:
+        flash('Trip not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user owns the trip or it's shared with them
+    if trip.get('user_id') != current_user.id and current_user.id not in trip.get('shared_with', []):
+        flash('You do not have access to this trip journal', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Get the journal entries for this trip
+    journal_entries = get_trip_journal_entries(trip_id)
+    
+    # Get the destination details
+    destination = get_destination_by_id(trip.get('destination_id'))
+    
+    return render_template('journal.html', 
+                          trip=trip,
+                          destination=destination,
+                          journal_entries=journal_entries)
+
+@app.route('/trips/<trip_id>/journal/new', methods=['GET', 'POST'])
+@login_required
+def create_journal_entry_route(trip_id):
+    # Get the trip
+    trip = get_trip_by_id(trip_id)
+    if not trip:
+        flash('Trip not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user owns the trip or it's shared with them
+    if trip.get('user_id') != current_user.id and current_user.id not in trip.get('shared_with', []):
+        flash('You do not have access to this trip journal', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        # Get form data
+        title = request.form.get('title')
+        content = request.form.get('content')
+        date = request.form.get('date')
+        location = request.form.get('location')
+        mood = request.form.get('mood')
+        
+        if not title or not content or not date:
+            flash('Title, content and date are required', 'danger')
+            return redirect(url_for('create_journal_entry_route', trip_id=trip_id))
+        
+        # Process image uploads (if present)
+        image_urls = []
+        if 'images' in request.files:
+            images = request.files.getlist('images')
+            for image in images:
+                if image and image.filename:
+                    # For now, just store the filename (we'd need to implement actual file upload)
+                    image_urls.append(image.filename)
+        
+        # Create journal entry
+        journal_entry = JournalEntry(
+            trip_id=trip_id,
+            user_id=current_user.id,
+            date=date,
+            title=title,
+            content=content,
+            location=location,
+            image_urls=image_urls,
+            mood=mood
+        )
+        
+        # Save to database
+        success = create_journal_entry(journal_entry)
+        if success:
+            flash('Journal entry created successfully', 'success')
+            return redirect(url_for('trip_journal', trip_id=trip_id))
+        else:
+            flash('Failed to create journal entry', 'danger')
+    
+    # For GET request, show the form
+    return render_template('journal_entry_form.html', 
+                          trip=trip,
+                          entry=None,
+                          is_new=True)
+
+@app.route('/journal/entry/<entry_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_journal_entry(entry_id):
+    # Get the journal entry
+    entry = get_journal_entry_by_id(entry_id)
+    if not entry:
+        flash('Journal entry not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user owns the entry
+    if entry.get('user_id') != current_user.id:
+        flash('You do not have permission to edit this journal entry', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Get the trip
+    trip = get_trip_by_id(entry.get('trip_id'))
+    
+    if request.method == 'POST':
+        # Get form data
+        title = request.form.get('title')
+        content = request.form.get('content')
+        date = request.form.get('date')
+        location = request.form.get('location')
+        mood = request.form.get('mood')
+        
+        if not title or not content or not date:
+            flash('Title, content and date are required', 'danger')
+            return redirect(url_for('edit_journal_entry', entry_id=entry_id))
+        
+        # Process image uploads (if present)
+        image_urls = entry.get('image_urls', [])
+        if 'images' in request.files:
+            images = request.files.getlist('images')
+            for image in images:
+                if image and image.filename:
+                    # For now, just store the filename (we'd need to implement actual file upload)
+                    image_urls.append(image.filename)
+        
+        # Update journal entry
+        journal_entry = JournalEntry(
+            id=entry_id,
+            trip_id=entry.get('trip_id'),
+            user_id=current_user.id,
+            date=date,
+            title=title,
+            content=content,
+            location=location,
+            image_urls=image_urls,
+            mood=mood
+        )
+        
+        # Save to database
+        success = update_journal_entry(journal_entry)
+        if success:
+            flash('Journal entry updated successfully', 'success')
+            return redirect(url_for('trip_journal', trip_id=entry.get('trip_id')))
+        else:
+            flash('Failed to update journal entry', 'danger')
+    
+    # For GET request, show the form with existing data
+    return render_template('journal_entry_form.html', 
+                          trip=trip,
+                          entry=entry,
+                          is_new=False)
+
+@app.route('/journal/entry/<entry_id>/delete', methods=['POST'])
+@login_required
+def delete_journal_entry_route(entry_id):
+    # Get the journal entry
+    entry = get_journal_entry_by_id(entry_id)
+    if not entry:
+        flash('Journal entry not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user owns the entry
+    if entry.get('user_id') != current_user.id:
+        flash('You do not have permission to delete this journal entry', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Delete the entry
+    trip_id = entry.get('trip_id')
+    success = delete_journal_entry(entry_id)
+    
+    if success:
+        flash('Journal entry deleted successfully', 'success')
+    else:
+        flash('Failed to delete journal entry', 'danger')
+    
+    return redirect(url_for('trip_journal', trip_id=trip_id))
+
+@app.route('/trips/<trip_id>/journal/download')
+@login_required
+def download_journal(trip_id):
+    # Get the trip
+    trip = get_trip_by_id(trip_id)
+    if not trip:
+        flash('Trip not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user owns the trip or it's shared with them
+    if trip.get('user_id') != current_user.id and current_user.id not in trip.get('shared_with', []):
+        flash('You do not have access to this trip journal', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Get the journal entries for this trip
+    journal_entries = get_trip_journal_entries(trip_id)
+    
+    # Get the destination details
+    destination = get_destination_by_id(trip.get('destination_id'))
+    
+    # Generate PDF (placeholder - would require a PDF library)
+    # For now, just show a formatted HTML page that could be printed
+    return render_template('journal_download.html',
+                          trip=trip,
+                          destination=destination,
+                          journal_entries=journal_entries)
+
+# Trip Sharing and Group Planning Routes
+@app.route('/trips/<trip_id>/share', methods=['GET', 'POST'])
+@login_required
+def share_trip(trip_id):
+    # Get the trip
+    trip = get_trip_by_id(trip_id)
+    if not trip:
+        flash('Trip not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user owns the trip
+    if trip.get('user_id') != current_user.id:
+        flash('You do not have permission to share this trip', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        share_budget = request.form.get('share_budget') == 'on'
+        
+        if not email:
+            flash('Email is required', 'danger')
+            return redirect(url_for('share_trip', trip_id=trip_id))
+        
+        # Check if a user with this email exists
+        invited_user = get_user_by_email(email)
+        
+        # Create invitation
+        invitation = TripInvitation(
+            trip_id=trip_id,
+            invited_by_id=current_user.id,
+            email=email,
+            user_id=invited_user.id if invited_user else None
+        )
+        
+        # Save to database
+        success = create_invitation(invitation)
+        
+        # Update trip sharing settings
+        trip_obj = Trip(
+            id=trip_id,
+            sharing_enabled=True,
+            budget_shared=share_budget
+        )
+        update_trip(trip_obj)
+        
+        if success:
+            # Here we would send an email with the invitation link
+            flash(f'Invitation sent to {email}', 'success')
+        else:
+            flash('Failed to send invitation', 'danger')
+        
+        return redirect(url_for('share_trip', trip_id=trip_id))
+    
+    # For GET request
+    # Get existing invitations for this trip
+    invitations = get_trip_invitations(trip_id)
+    
+    # Get users who already have access
+    shared_with_users = []
+    for user_id in trip.get('shared_with', []):
+        user = get_user_by_id(user_id)
+        if user:
+            shared_with_users.append(user)
+    
+    return render_template('share_trip.html',
+                          trip=trip,
+                          invitations=invitations,
+                          shared_with_users=shared_with_users)
+
+@app.route('/invitations')
+@login_required
+def user_invitations():
+    # Get invitations for the current user by email
+    invitations = get_user_invitations(current_user.email)
+    
+    # Process invitations to show trip details
+    for invitation in invitations:
+        trip = get_trip_by_id(invitation.get('trip_id'))
+        if trip:
+            invitation['trip'] = trip
+            
+            # Get inviter details
+            inviter = get_user_by_id(invitation.get('invited_by_id'))
+            if inviter:
+                invitation['inviter_name'] = inviter.username
+    
+    return render_template('invitations.html', invitations=invitations)
+
+@app.route('/invitation/<code>/accept', methods=['POST'])
+@login_required
+def accept_invitation(code):
+    # Get the invitation
+    invitation = get_invitation_by_code(code)
+    if not invitation:
+        flash('Invitation not found or has expired', 'danger')
+        return redirect(url_for('user_invitations'))
+    
+    # Check if the invitation is for the current user's email
+    if invitation.get('email') != current_user.email:
+        flash('This invitation is not for your account', 'danger')
+        return redirect(url_for('user_invitations'))
+    
+    # Update the invitation status to accepted
+    invitation_obj = TripInvitation(
+        id=invitation.get('id'),
+        status=TripInvitation.STATUS_ACCEPTED,
+        user_id=current_user.id
+    )
+    update_invitation(invitation_obj)
+    
+    # Add user to the shared trip
+    trip_id = invitation.get('trip_id')
+    add_user_to_shared_trip(trip_id, current_user.id)
+    
+    flash('You have successfully joined the trip', 'success')
+    return redirect(url_for('view_itinerary', itinerary_id=trip_id))
+
+@app.route('/invitation/<code>/decline', methods=['POST'])
+@login_required
+def decline_invitation(code):
+    # Get the invitation
+    invitation = get_invitation_by_code(code)
+    if not invitation:
+        flash('Invitation not found or has expired', 'danger')
+        return redirect(url_for('user_invitations'))
+    
+    # Check if the invitation is for the current user's email
+    if invitation.get('email') != current_user.email:
+        flash('This invitation is not for your account', 'danger')
+        return redirect(url_for('user_invitations'))
+    
+    # Update the invitation status to declined
+    invitation_obj = TripInvitation(
+        id=invitation.get('id'),
+        status=TripInvitation.STATUS_DECLINED
+    )
+    update_invitation(invitation_obj)
+    
+    flash('You have declined the trip invitation', 'info')
+    return redirect(url_for('user_invitations'))
+
+@app.route('/trips/shared')
+@login_required
+def shared_trips():
+    # Get trips shared with the current user
+    trips = get_shared_trips(current_user.id)
+    
+    # Process trips to include destination details
+    for trip in trips:
+        destination = get_destination_by_id(trip.get('destination_id'))
+        if destination:
+            trip['destination'] = destination
+    
+    return render_template('shared_trips.html', trips=trips)
 
 # Error handlers
 @app.errorhandler(404)

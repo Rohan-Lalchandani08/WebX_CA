@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "e7863766-4a76-4f00-84e5-05bf66c2f824",
+    "trip_id": "565bc78b-9797-48af-8e08-cbe161f5e56e",
+    "date": "2025-04-21",
+    "activities": [
+      {
+        "name": "Go to Eiffel Tower",
+        "time": "2:30",
+        "notes": "Take Passport"
+      }
+    ],
+    "notes": ""
+  },
+  {
+    "_id": "2482eaf2-743d-4721-b176-3df9d567b59b",
+    "trip_id": "565bc78b-9797-48af-8e08-cbe161f5e56e",
+    "date": "2025-04-22",
+    "activities": [],
+    "notes": ""
+  },
+  {
+    "_id": "76249303-d68e-4eef-a11f-bf4f68238bb7",
+    "trip_id": "565bc78b-9797-48af-8e08-cbe161f5e56e",
+    "date": "2025-04-23",
+    "activities": [],
+    "notes": ""
+  }
+]
