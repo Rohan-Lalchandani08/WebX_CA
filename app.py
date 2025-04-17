@@ -1,14 +1,20 @@
 import os
 import uuid
+import logging
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from data import (load_destinations, get_destination_by_id, 
-                 load_travel_tips, get_itineraries, save_itinerary, 
-                 get_itinerary_by_id, delete_itinerary, update_itinerary)
+from config import SECRET_KEY
 from weather import get_weather_for_city
 
+# Initialize Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
+app.secret_key = SECRET_KEY
+
+# Import database functions after app initialization to avoid circular imports
+from db import (load_destinations, get_destination_by_id, 
+               load_travel_tips, get_itineraries, save_itinerary, 
+               get_itinerary_by_id, delete_itinerary, update_itinerary,
+               get_user_by_id)
 
 @app.route('/')
 def index():
