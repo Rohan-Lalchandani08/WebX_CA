@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Shared Trips{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Trips Shared With You</h4>
+                </div>
+                <div class="card-body">
+                    {% if trips %}
+                        <div class="row">
+                            {% for trip in trips %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        {% if trip.destination and trip.destination.image_url %}
+                                            <img src="{{ trip.destination.image_url }}" class="card-img-top" alt="{{ trip.destination.name }}">
+                                        {% else %}
+                                            <div class="card-img-top bg-light text-center py-5">
+                                                <i class="bi bi-image" style="font-size: 3rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ trip.title }}</h5>
+                                            
+                                            {% if trip.destination %}
+                                                <p class="card-text">
+                                                    <i class="bi bi-geo-alt"></i> 
+                                                    {{ trip.destination.name }}, {{ trip.destination.country }}
+                                                </p>
+                                            {% endif %}
+                                            
+                                            <p class="card-text">
+                                                <i class="bi bi-calendar3"></i> 
+                                                {{ trip.start_date }} to {{ trip.end_date }}
+                                            </p>
+                                            
+                                            <p class="card-text">
+                                                <i class="bi bi-person"></i> 
+                                                Shared by: {{ trip.get_owner_name() }}
+                                            </p>
+                                            
+                                            {% if trip.countdown is defined %}
+                                                <p class="card-text">
+                                                    {% if trip.countdown > 0 %}
+                                                        <span class="badge bg-primary">
+                                                            <i class="bi bi-hourglass-split"></i> 
+                                                            {{ trip.countdown }} days until trip
+                                                        </span>
+                                                    {% elif trip.countdown == 0 %}
+                                                        <span class="badge bg-success">
+                                                            <i class="bi bi-calendar-check"></i> 
+                                                            Today!
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">
+                                                            <i class="bi bi-calendar-check"></i> 
+                                                            Past trip
+                                                        </span>
+                                                    {% endif %}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="card-footer">
+                                            <div class="d-grid gap-2">
+                                                <a href="{{ url_for('view_itinerary', itinerary_id=trip.id) }}" class="btn btn-primary">
+                                                    <i class="bi bi-eye"></i> View Trip
+                                                </a>
+                                                {% if trip.budget_shared %}
+                                                    <a href="{{ url_for('trip_expenses', trip_id=trip.id) }}" class="btn btn-outline-primary">
+                                                        <i class="bi bi-currency-dollar"></i> Budget & Expenses
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{{ url_for('trip_journal', trip_id=trip.id) }}" class="btn btn-outline-secondary">
+                                                    <i class="bi bi-journal-text"></i> Journal
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">No trips have been shared with you yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

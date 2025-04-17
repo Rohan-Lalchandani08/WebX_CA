@@ -771,6 +771,49 @@ def share_trip(trip_id):
                           invitations=invitations,
                           shared_with_users=shared_with_users)
 
+@app.route('/invitation/<invitation_id>/cancel', methods=['POST'])
+@login_required
+def cancel_invitation(invitation_id):
+    # Get the invitation
+    invitation = get_invitation_by_code(invitation_id)
+    if not invitation:
+        flash('Invitation not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user is the trip owner
+    trip = get_trip_by_id(invitation.get('trip_id'))
+    if not trip or trip.get('user_id') != current_user.id:
+        flash('You do not have permission to cancel this invitation', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Delete the invitation
+    mongo.db.invitations.delete_one({"_id": invitation_id})
+    
+    flash('Invitation has been cancelled', 'success')
+    return redirect(url_for('share_trip', trip_id=invitation.get('trip_id')))
+
+@app.route('/trips/<trip_id>/remove_user/<user_id>', methods=['POST'])
+@login_required
+def remove_user_from_shared_trip_route(trip_id, user_id):
+    # Get the trip
+    trip = get_trip_by_id(trip_id)
+    if not trip:
+        flash('Trip not found', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Check if user is the trip owner
+    if trip.get('user_id') != current_user.id:
+        flash('You do not have permission to remove users from this trip', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    # Remove user from shared_with list
+    if remove_user_from_shared_trip(trip_id, user_id):
+        flash('User has been removed from the trip', 'success')
+    else:
+        flash('Failed to remove user from the trip', 'danger')
+    
+    return redirect(url_for('share_trip', trip_id=trip_id))
+
 @app.route('/invitations')
 @login_required
 def user_invitations():

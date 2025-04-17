@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Share Trip{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <a href="{{ url_for('view_itinerary', itinerary_id=trip.id) }}" class="btn btn-outline-secondary mb-3">
+                <i class="bi bi-arrow-left"></i> Back to Trip
+            </a>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Share Trip</h4>
+                    <p class="text-muted mb-0">{{ trip.title }}</p>
+                </div>
+                <div class="card-body">
+                    <!-- Current Access Section -->
+                    <h5 class="mb-3">Current Access</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="list-group">
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>You (Owner)</strong>
+                                        <small class="d-block text-muted">{{ current_user.email }}</small>
+                                    </div>
+                                    <span class="badge bg-primary">Owner</span>
+                                </div>
+                                
+                                {% for user in shared_with_users %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ user.username }}</strong>
+                                            <small class="d-block text-muted">{{ user.email }}</small>
+                                        </div>
+                                        <form action="{{ url_for('remove_user_from_shared_trip', trip_id=trip.id, user_id=user.id) }}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-x-circle"></i> Remove
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if not shared_with_users %}
+                                <div class="alert alert-info">
+                                    <p class="mb-0">You haven't shared this trip with anyone yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Pending Invitations Section -->
+                    <h5 class="mb-3">Pending Invitations</h5>
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="list-group">
+                                {% for invitation in invitations %}
+                                    {% if invitation.status == 'pending' %}
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ invitation.email }}</strong>
+                                                <small class="d-block text-muted">Invited on {{ invitation.created_at.strftime('%B %d, %Y') }}</small>
+                                            </div>
+                                            <form action="{{ url_for('cancel_invitation', invitation_id=invitation.id) }}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            
+                            {% if not invitations or not invitations|selectattr('status', 'equalto', 'pending')|list %}
+                                <div class="alert alert-info">
+                                    <p class="mb-0">No pending invitations.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Invite New People Section -->
+                    <h5 class="mb-3">Invite People</h5>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form method="post">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                    <div class="form-text">Enter the email address of the person you want to invite.</div>
+                                </div>
+                                
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="share_budget" name="share_budget" 
+                                           {% if trip.budget_shared %}checked{% endif %}>
+                                    <label class="form-check-label" for="share_budget">Share budget information</label>
+                                    <div class="form-text">When enabled, invited users can see and edit budget and expenses.</div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-envelope"></i> Send Invitation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

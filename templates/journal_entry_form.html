@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if is_new %}Create Journal Entry{% else %}Edit Journal Entry{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <a href="{{ url_for('trip_journal', trip_id=trip.id) }}" class="btn btn-outline-secondary mb-3">
+                <i class="bi bi-arrow-left"></i> Back to Journal
+            </a>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        {% if is_new %}Create New Journal Entry{% else %}Edit Journal Entry{% endif %}
+                    </h4>
+                    <p class="text-muted mb-0">Trip: {{ trip.title }}</p>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="{{ entry.title if entry else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date" name="date" 
+                                   value="{{ entry.date if entry else '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location (optional)</label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   value="{{ entry.location if entry else '' }}">
+                            <div class="form-text">Where were you when this happened?</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="mood" class="form-label">Mood (optional)</label>
+                            <select class="form-select" id="mood" name="mood">
+                                <option value="" {% if not entry or not entry.mood %}selected{% endif %}>Select mood</option>
+                                <option value="Happy" {% if entry and entry.mood == 'Happy' %}selected{% endif %}>Happy</option>
+                                <option value="Excited" {% if entry and entry.mood == 'Excited' %}selected{% endif %}>Excited</option>
+                                <option value="Relaxed" {% if entry and entry.mood == 'Relaxed' %}selected{% endif %}>Relaxed</option>
+                                <option value="Tired" {% if entry and entry.mood == 'Tired' %}selected{% endif %}>Tired</option>
+                                <option value="Amazed" {% if entry and entry.mood == 'Amazed' %}selected{% endif %}>Amazed</option>
+                                <option value="Nostalgic" {% if entry and entry.mood == 'Nostalgic' %}selected{% endif %}>Nostalgic</option>
+                                <option value="Adventurous" {% if entry and entry.mood == 'Adventurous' %}selected{% endif %}>Adventurous</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content</label>
+                            <textarea class="form-control" id="content" name="content" rows="6" required>{{ entry.content if entry else '' }}</textarea>
+                            <div class="form-text">Write about your experiences, thoughts, and memories.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="images" class="form-label">Photos (optional)</label>
+                            <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                            <div class="form-text">Upload photos to remember this moment (maximum 5 photos).</div>
+                        </div>
+                        
+                        {% if entry and entry.image_urls %}
+                            <div class="mb-4">
+                                <label class="form-label">Current Photos</label>
+                                <div class="row">
+                                    {% for image_url in entry.image_urls %}
+                                        <div class="col-md-3 mb-2">
+                                            <img src="{{ image_url }}" class="img-fluid rounded" alt="Journal image">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text">Uploading new photos will add to these existing ones.</div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="text-end">
+                            <a href="{{ url_for('trip_journal', trip_id=trip.id) }}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if is_new %}Create Entry{% else %}Update Entry{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

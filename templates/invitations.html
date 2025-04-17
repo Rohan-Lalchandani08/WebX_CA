@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Trip Invitations{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mb-3">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Trip Invitations</h4>
+                </div>
+                <div class="card-body">
+                    {% if invitations %}
+                        <div class="list-group">
+                            {% for invitation in invitations %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">{{ invitation.trip.title }}</h5>
+                                        <small class="text-muted">
+                                            {{ invitation.created_at.strftime('%b %d, %Y') }}
+                                        </small>
+                                    </div>
+                                    
+                                    <p class="mb-1">
+                                        {% if invitation.trip.destination %}
+                                            <i class="bi bi-geo-alt"></i> 
+                                            {{ invitation.trip.destination.name }}, {{ invitation.trip.destination.country }}
+                                        {% endif %}
+                                    </p>
+                                    
+                                    <p class="mb-1">
+                                        <i class="bi bi-calendar3"></i> 
+                                        {{ invitation.trip.start_date }} to {{ invitation.trip.end_date }}
+                                    </p>
+                                    
+                                    <p class="mb-3">
+                                        <i class="bi bi-person"></i> 
+                                        Invited by: {{ invitation.inviter_name }}
+                                    </p>
+                                    
+                                    <div class="d-flex">
+                                        <form action="{{ url_for('accept_invitation', code=invitation.invitation_code) }}" method="post" class="me-2">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-check-circle"></i> Accept
+                                            </button>
+                                        </form>
+                                        
+                                        <form action="{{ url_for('decline_invitation', code=invitation.invitation_code) }}" method="post">
+                                            <button type="submit" class="btn btn-outline-danger">
+                                                <i class="bi bi-x-circle"></i> Decline
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">You don't have any pending trip invitations.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
