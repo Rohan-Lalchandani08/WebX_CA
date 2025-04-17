@@ -1,0 +1,9 @@
+[
+  {
+    "_id": "6adf632f-5be0-434a-a195-4bdf0ce76391",
+    "username": "rohan_lalchandani",
+    "email": "2022.rohan.lalchandani@ves.ac.in",
+    "password_hash": "scrypt:32768:8:1$y9doU6Xg8NYY2cId$f242a8384fd788185579c612062f6c3cca3ade8d46fc2e82a8b328d02c6cecd465bdd6d6de0ddc475859d213ce1c54efecd7563539c5878ee41c6ae7771daf56",
+    "created_at": "2025-04-17T08:15:13.876956"
+  }
+]
