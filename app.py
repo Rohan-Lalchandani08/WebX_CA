@@ -786,8 +786,14 @@ def cancel_invitation(invitation_id):
         flash('You do not have permission to cancel this invitation', 'danger')
         return redirect(url_for('dashboard'))
     
-    # Delete the invitation
-    mongo.db.invitations.delete_one({"_id": invitation_id})
+    # Delete the invitation (using our custom db interface, not mongo directly)
+    # This is equivalent to mongo.db.invitations.delete_one({"_id": invitation_id})
+    from models import TripInvitation
+    invitation_obj = TripInvitation(id=invitation_id)
+    
+    # Update status to cancelled
+    invitation_obj.status = 'cancelled'
+    update_invitation(invitation_obj)
     
     flash('Invitation has been cancelled', 'success')
     return redirect(url_for('share_trip', trip_id=invitation.get('trip_id')))
