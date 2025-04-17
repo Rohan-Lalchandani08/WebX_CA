@@ -19,12 +19,14 @@ class User(UserMixin):
     def from_dict(cls, data):
         if not data:
             return None
-        return cls(
+        user = cls(
             id=data.get('_id') or data.get('id'),
             username=data.get('username'),
             email=data.get('email'),
             created_at=data.get('created_at')
         )
+        user.password_hash = data.get('password_hash')
+        return user
     
     def to_dict(self):
         return {
