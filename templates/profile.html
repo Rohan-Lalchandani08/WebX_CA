@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Smart Travel Planner{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Profile</h5>
+        </div>
+        <div class="card-body text-center">
+          <div class="rounded-circle bg-secondary d-inline-flex justify-content-center align-items-center mb-3" style="width: 100px; height: 100px;">
+            <i class="fas fa-user fa-3x text-light"></i>
+          </div>
+          <h5 class="my-3">{{ current_user.username }}</h5>
+          <p class="text-muted mb-1">{{ current_user.email }}</p>
+          <p class="text-muted mb-4">Member since: {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+          <div class="d-flex justify-content-center mb-2">
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+            <a href="{{ url_for('change_password') }}" class="btn btn-outline-primary ms-1">Change Password</a>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Stats</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Trips Planned
+              <span class="badge bg-primary rounded-pill">{{ trips_count }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Reviews Written
+              <span class="badge bg-primary rounded-pill">{{ reviews_count }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Countries Visited
+              <span class="badge bg-primary rounded-pill">{{ countries_count }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Upcoming Trips</h5>
+          <a href="{{ url_for('create_itinerary') }}" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus me-1"></i> New Trip
+          </a>
+        </div>
+        <div class="card-body">
+          {% if upcoming_trips %}
+            {% for trip in upcoming_trips %}
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">{{ trip.title }}</h5>
+                    <span class="badge bg-primary">
+                      {{ trip.countdown }} days left
+                    </span>
+                  </div>
+                  <p class="card-text text-muted">
+                    <i class="fas fa-map-marker-alt me-1"></i> {{ trip.destination_name }}
+                  </p>
+                  <p class="card-text">
+                    <i class="fas fa-calendar me-1"></i> {{ trip.start_date }} to {{ trip.end_date }}
+                  </p>
+                  <div class="d-flex justify-content-end">
+                    <a href="{{ url_for('view_itinerary', itinerary_id=trip.id) }}" class="btn btn-sm btn-outline-primary me-2">
+                      <i class="fas fa-eye me-1"></i> View
+                    </a>
+                    <a href="{{ url_for('edit_itinerary', itinerary_id=trip.id) }}" class="btn btn-sm btn-outline-secondary">
+                      <i class="fas fa-edit me-1"></i> Edit
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center py-4">
+              <div class="mb-3">
+                <i class="fas fa-plane fa-3x text-muted"></i>
+              </div>
+              <p class="text-muted">You don't have any upcoming trips.</p>
+              <a href="{{ url_for('create_itinerary') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Plan a Trip
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Recent Activity</h5>
+        </div>
+        <div class="card-body">
+          {% if activities %}
+            <ul class="list-group list-group-flush">
+              {% for activity in activities %}
+                <li class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">{{ activity.title }}</h6>
+                    <small class="text-muted">{{ activity.date }}</small>
+                  </div>
+                  <p class="mb-1">{{ activity.description }}</p>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-center text-muted py-3">No recent activity</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
