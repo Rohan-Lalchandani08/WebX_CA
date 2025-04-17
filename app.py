@@ -479,9 +479,18 @@ def dashboard():
 def add_expense():
     form = ExpenseForm()
     if form.validate_on_submit():
-        # Create expense object
+        trip_id = request.form.get('trip_id')
+        trip = get_trip_by_id(trip_id)
+        
+        # Check if user has access to add expenses
+        if not trip.get('budget_shared') and trip.get('user_id') != current_user.id:
+            flash('You do not have permission to add expenses to this trip', 'danger')
+            return redirect(url_for('dashboard'))
+            
+        # Create expense object with user tracking
         expense = Expense(
-            trip_id=request.form.get('trip_id'),
+            trip_id=trip_id,
+            user_id=current_user.id,
             amount=form.amount.data,
             category=form.category.data,
             description=form.description.data,
@@ -556,8 +565,14 @@ def create_journal_entry_route(trip_id):
             images = request.files.getlist('images')
             for image in images:
                 if image and image.filename:
-                    # For now, just store the filename (we'd need to implement actual file upload)
-                    image_urls.append(image.filename)
+                    # Generate secure filename
+                    filename = secure_filename(image.filename)
+                    # Create unique filename with timestamp
+                    unique_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
+                    # Save to uploads directory
+                    upload_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+                    image.save(upload_path)
+                    image_urls.append(f"/uploads/{unique_filename}")
         
         # Create journal entry
         journal_entry = JournalEntry(

@@ -64,10 +64,17 @@
                                 {% if entry.image_urls %}
                                     <div class="row mb-3">
                                         {% for image_url in entry.image_urls %}
-                                            <div class="col-md-3 mb-2">
-                                                <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal{{ loop.index }}{{ entry.id }}">
-                                                    <img src="{{ image_url }}" class="img-fluid rounded" alt="Journal image">
-                                                </a>
+                                            <div class="col-md-3 col-sm-6 mb-2">
+                                                <div class="image-card">
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal{{ loop.index }}{{ entry.id }}">
+                                                        <img src="{{ image_url }}" class="img-fluid rounded shadow-sm" alt="Journal image">
+                                                    </a>
+                                                    <div class="image-overlay">
+                                                        <a href="{{ image_url }}" download class="btn btn-sm btn-light">
+                                                            <i class="bi bi-download"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
                                                 
                                                 <!-- Image Modal -->
                                                 <div class="modal fade" id="imageModal{{ loop.index }}{{ entry.id }}" tabindex="-1" aria-hidden="true">
