@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_new %}Create New Itinerary{% else %}Edit Itinerary: {{ itinerary.title }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('itineraries') }}">My Itineraries</a></li>
+            <li class="breadcrumb-item active" aria-current="page">
+                {% if is_new %}Create New Itinerary{% else %}Edit {{ itinerary.title }}{% endif %}
+            </li>
+        </ol>
+    </nav>
+    
+    <h1 class="mb-4">
+        {% if is_new %}
+        <i class="fas fa-calendar-plus me-2"></i> Create New Itinerary
+        {% else %}
+        <i class="fas fa-edit me-2"></i> Edit Itinerary
+        {% endif %}
+    </h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post" action="{{ url_for('create_itinerary') if is_new else url_for('edit_itinerary', itinerary_id=itinerary.id) }}">
+                <!-- Basic Information -->
+                <h2 class="h4 mb-3"><i class="fas fa-info-circle me-2"></i> Basic Information</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12 mb-3">
+                        <label for="title" class="form-label">Itinerary Title</label>
+                        <input type="text" class="form-control" id="title" name="title" 
+                               placeholder="e.g., Summer Vacation in Paris" 
+                               value="{{ itinerary.title if itinerary else '' }}" required>
+                    </div>
+                    
+                    {% if is_new %}
+                    <div class="col-md-4 mb-3">
+                        <label for="destination_id" class="form-label">Destination</label>
+                        <select class="form-select" id="destination_id" name="destination_id" required>
+                            <option value="" selected disabled>Select a destination</option>
+                            {% for destination in destinations %}
+                            <option value="{{ destination.id }}" {% if request.args.get('destination_id') == destination.id %}selected{% endif %}>
+                                {{ destination.name }}, {{ destination.country }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="start-date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start-date" name="start_date" required>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label for="end-date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end-date" name="end_date" required>
+                    </div>
+                    {% else %}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Destination</label>
+                        <input type="text" class="form-control" value="{{ itinerary.destination_name }}" readonly>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="text" class="form-control" value="{{ itinerary.start_date }}" readonly>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="text" class="form-control" value="{{ itinerary.end_date }}" readonly>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if not is_new %}
+                <!-- Daily Planning -->
+                <h2 class="h4 mb-3"><i class="fas fa-calendar-day me-2"></i> Daily Planning</h2>
+                
+                <div class="accordion mb-4" id="daysAccordion">
+                    {% for day in itinerary.days %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" 
+                                    aria-expanded="{{ 'true' if loop.first else 'false' }}" aria-controls="collapse{{ loop.index }}">
+                                Day {{ loop.index }}: {{ day.date }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                             aria-labelledby="heading{{ loop.index }}" data-bs-parent="#daysAccordion">
+                            <div class="accordion-body">
+                                <div class="mb-3">
+                                    <h5>Activities</h5>
+                                    <p class="text-muted small">Plan what you'll do on this day. Add as many activities as you need.</p>
+                                    
+                                    <div class="row mb-2">
+                                        <div class="col-md-4">
+                                            <strong>Activity Name</strong>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Time</strong>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <strong>Notes</strong>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="activities-{{ day.date }}">
+                                        {% for activity in day.activities %}
+                                        <div class="activity-row row mb-3">
+                                            <div class="col-md-4">
+                                                <input type="text" name="activity_{{ day.date }}_{{ loop.index0 }}" 
+                                                       class="form-control" placeholder="Activity" 
+                                                       value="{{ activity.name }}">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input type="text" name="time_{{ day.date }}_{{ loop.index0 }}" 
+                                                       class="form-control" placeholder="Time" 
+                                                       value="{{ activity.time }}">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input type="text" name="notes_{{ day.date }}_{{ loop.index0 }}" 
+                                                       class="form-control" placeholder="Notes" 
+                                                       value="{{ activity.notes }}">
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        
+                                        <!-- Empty row for new activities if none exist -->
+                                        {% if not day.activities %}
+                                        <div class="activity-row row mb-3">
+                                            <div class="col-md-4">
+                                                <input type="text" name="activity_{{ day.date }}_0" 
+                                                       class="form-control" placeholder="Activity">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input type="text" name="time_{{ day.date }}_0" 
+                                                       class="form-control" placeholder="Time">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <input type="text" name="notes_{{ day.date }}_0" 
+                                                       class="form-control" placeholder="Notes">
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-sm btn-outline-primary add-activity-btn" 
+                                            data-day="{{ day.date }}" data-day-index="{{ loop.index0 }}">
+                                        <i class="fas fa-plus me-1"></i> Add Another Activity
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('itineraries') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> 
+                        {% if is_new %}Create Itinerary{% else %}Save Changes{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

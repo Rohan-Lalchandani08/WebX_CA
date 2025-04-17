@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Explore Destinations - Smart Travel Planner{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4"><i class="fas fa-globe-americas me-2"></i> Explore Destinations</h1>
+    
+    <!-- Search Bar -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('destinations') }}" method="get" class="row g-3">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Search by destination name, country, or tag..." 
+                           value="{{ search_query }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results Display -->
+    {% if search_query %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> 
+        Showing results for: <strong>"{{ search_query }}"</strong> 
+        ({{ destinations|length }} destinations found)
+    </div>
+    {% endif %}
+    
+    {% if destinations %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for destination in destinations %}
+        <div class="col">
+            <div class="card h-100 destination-card">
+                <img src="{{ destination.image_url }}" class="card-img-top" alt="{{ destination.name }}">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ destination.name }}, {{ destination.country }}</h5>
+                    <p class="card-text mb-3">{{ destination.description[:100] }}...</p>
+                    
+                    <div class="mb-3">
+                        {% for tag in destination.tags %}
+                        <span class="badge bg-info text-dark tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-auto">
+                        <a href="{{ url_for('destination_detail', destination_id=destination.id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-1"></i> Details
+                        </a>
+                        <a href="{{ url_for('create_itinerary') }}?destination_id={{ destination.id }}" class="btn btn-outline-success">
+                            <i class="fas fa-calendar-plus me-1"></i> Plan Trip
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i> 
+        No destinations found. Please try a different search term.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

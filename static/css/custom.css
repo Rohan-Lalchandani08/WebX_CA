@@ -1,0 +1,162 @@
+/* Custom styles for the travel planner */
+
+/* Hero section styles */
+.hero {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                      url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 6rem 0;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Card styles */
+.destination-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+}
+
+.destination-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.destination-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.destination-card .card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-img-overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease;
+}
+
+.card-img-overlay:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Tag styles */
+.tag {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+}
+
+/* Weather widget styles */
+.weather-widget {
+    background-color: rgba(var(--bs-info-rgb), 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.weather-icon {
+    width: 50px;
+    height: 50px;
+}
+
+/* Itinerary styles */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 2rem;
+}
+
+.timeline:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    background-color: var(--bs-primary);
+    border-radius: 2px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--bs-primary);
+    border: 4px solid var(--bs-dark);
+}
+
+.activity-item {
+    padding: 0.5rem;
+    border-left: 3px solid var(--bs-info);
+    margin-bottom: 0.5rem;
+    background-color: rgba(var(--bs-info-rgb), 0.1);
+}
+
+/* Travel tips styles */
+.tip-card {
+    background-color: rgba(var(--bs-secondary-rgb), 0.1);
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+}
+
+.tip-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.tip-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.2);
+}
+
+.tip-list li:last-child {
+    border-bottom: none;
+}
+
+.tip-list li:before {
+    content: "✈️ ";
+    margin-right: 0.5rem;
+}
+
+/* Footer styles */
+.footer {
+    background-color: var(--bs-dark);
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero {
+        padding: 4rem 0;
+    }
+    
+    .timeline:before {
+        left: -1rem;
+    }
+    
+    .timeline-item:before {
+        left: -2rem;
+    }
+}

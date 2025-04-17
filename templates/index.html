@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Smart Travel Planner - Plan Your Perfect Trip{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero text-center rounded">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Discover Your Next Adventure</h1>
+        <p class="lead">Plan your perfect trip with our smart travel planner. Find destinations, create itineraries, and make memories that last a lifetime.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
+            <a href="{{ url_for('destinations') }}" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="fas fa-search me-2"></i> Explore Destinations
+            </a>
+            <a href="{{ url_for('create_itinerary') }}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-calendar-plus me-2"></i> Create Itinerary
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Destinations -->
+<section class="my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-map-marked-alt me-2"></i> Featured Destinations</h2>
+        <a href="{{ url_for('destinations') }}" class="btn btn-outline-primary">
+            View All <i class="fas fa-arrow-right ms-2"></i>
+        </a>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for destination in featured_destinations %}
+        <div class="col">
+            <div class="card h-100 destination-card">
+                <img src="{{ destination.image_url }}" class="card-img-top" alt="{{ destination.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ destination.name }}, {{ destination.country }}</h5>
+                    <p class="card-text text-truncate">{{ destination.description }}</p>
+                    <div class="mb-3">
+                        {% for tag in destination.tags[:3] %}
+                        <span class="badge bg-info text-dark tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ url_for('destination_detail', destination_id=destination.id) }}" class="btn btn-sm btn-outline-primary mt-auto">
+                        <i class="fas fa-info-circle me-1"></i> Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Services Overview -->
+<section class="my-5">
+    <h2 class="text-center mb-4"><i class="fas fa-concierge-bell me-2"></i> Plan Your Perfect Trip</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 text-center">
+        <div class="col">
+            <div class="card h-100 border-0 bg-transparent">
+                <div class="card-body">
+                    <div class="display-6 text-info mb-3">
+                        <i class="fas fa-search-location"></i>
+                    </div>
+                    <h3 class="card-title h4">Discover Destinations</h3>
+                    <p class="card-text">Explore amazing destinations around the world. Get detailed information about attractions, best times to visit, and travel tips.</p>
+                    <a href="{{ url_for('destinations') }}" class="btn btn-outline-info">Explore Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 border-0 bg-transparent">
+                <div class="card-body">
+                    <div class="display-6 text-info mb-3">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3 class="card-title h4">Create Itineraries</h3>
+                    <p class="card-text">Build detailed day-by-day plans for your trips. Organize activities, set schedules, and keep all your travel plans in one place.</p>
+                    <a href="{{ url_for('create_itinerary') }}" class="btn btn-outline-info">Plan Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 border-0 bg-transparent">
+                <div class="card-body">
+                    <div class="display-6 text-info mb-3">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <h3 class="card-title h4">Check Weather</h3>
+                    <p class="card-text">Get up-to-date weather information for your destinations. Plan activities with confidence knowing the forecast for your travel dates.</p>
+                    <a href="{{ url_for('destinations') }}" class="btn btn-outline-info">View Weather</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Travel Tips Preview -->
+<section class="my-5">
+    <div class="card bg-dark">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="card-title"><i class="fas fa-lightbulb me-2"></i> Travel Tips & Advice</h2>
+                    <p class="card-text">Access valuable tips for packing, safety, budget, and health. Make your travel experience smoother and more enjoyable with expert advice.</p>
+                    <a href="{{ url_for('travel_tips') }}" class="btn btn-info">View Travel Tips</a>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="display-1 text-info">
+                        <i class="fas fa-suitcase"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

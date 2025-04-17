@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Travel Tips & Advice - Smart Travel Planner{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4"><i class="fas fa-lightbulb me-2"></i> Travel Tips & Advice</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <p class="lead">
+                Make your travels smoother and more enjoyable with these expert tips and advice. 
+                From packing efficiently to staying safe abroad, we've got you covered with practical information.
+            </p>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark">
+                <div class="card-body text-center">
+                    <h5 class="card-title"><i class="fas fa-quote-left me-2"></i> Travel Quote</h5>
+                    <p class="card-text fst-italic">"The world is a book and those who do not travel read only one page."</p>
+                    <p class="card-text small text-muted">- Saint Augustine</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Tips categories navigation -->
+        <div class="col-md-3 mb-4">
+            <div class="list-group sticky-top" style="top: 20px;">
+                <a href="#general" class="list-group-item list-group-item-action bg-dark">
+                    <i class="fas fa-star me-2"></i> All Categories
+                </a>
+                {% for tip in tips %}
+                <a href="#{{ tip.category.lower() }}" class="list-group-item list-group-item-action bg-dark">
+                    <i class="fas fa-angle-right me-2"></i> {{ tip.category }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Tips content -->
+        <div class="col-md-9">
+            <div id="general">
+                {% for tip in tips %}
+                <div class="tip-card card mb-4" id="{{ tip.category.lower() }}">
+                    <div class="card-header bg-dark">
+                        <h2 class="h4 mb-0">
+                            {% if tip.category == 'Packing' %}
+                            <i class="fas fa-suitcase me-2 text-info"></i>
+                            {% elif tip.category == 'Safety' %}
+                            <i class="fas fa-shield-alt me-2 text-info"></i>
+                            {% elif tip.category == 'Budget' %}
+                            <i class="fas fa-money-bill-wave me-2 text-info"></i>
+                            {% elif tip.category == 'Health' %}
+                            <i class="fas fa-heartbeat me-2 text-info"></i>
+                            {% else %}
+                            <i class="fas fa-info-circle me-2 text-info"></i>
+                            {% endif %}
+                            {{ tip.title }}
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <ul class="tip-list">
+                            {% for item in tip.tips %}
+                            <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Additional general advice -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="h4 mb-0"><i class="fas fa-globe me-2 text-info"></i> General Travel Advice</h2>
+                </div>
+                <div class="card-body">
+                    <p>Traveling to a new place can be exciting but also challenging. Here are some general tips to make your journey smoother:</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-dark mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-clock me-2"></i> Before You Go</h5>
+                                    <ul>
+                                        <li>Research your destination thoroughly</li>
+                                        <li>Make copies of important documents</li>
+                                        <li>Check visa requirements well in advance</li>
+                                        <li>Notify your bank of travel plans</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-dark mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fas fa-plane me-2"></i> During Your Trip</h5>
+                                    <ul>
+                                        <li>Keep emergency contacts handy</li>
+                                        <li>Be respectful of local customs</li>
+                                        <li>Try local cuisine but be cautious</li>
+                                        <li>Keep an open mind and be flexible</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-lightbulb me-2"></i> <strong>Pro Tip:</strong> Download offline maps, translation apps, and important travel information before your trip in case you don't have reliable internet access.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

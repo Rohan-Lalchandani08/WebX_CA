@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if view_single %}{{ itinerary.title }} - Trip Itinerary{% else %}My Itineraries{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if view_single %}
+    <!-- Single Itinerary View -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('itineraries') }}">My Itineraries</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ itinerary.title }}</li>
+        </ol>
+    </nav>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-route me-2"></i> {{ itinerary.title }}</h1>
+        <div>
+            <a href="{{ url_for('edit_itinerary', itinerary_id=itinerary.id) }}" class="btn btn-primary me-2">
+                <i class="fas fa-edit me-1"></i> Edit
+            </a>
+            <form action="{{ url_for('delete_itinerary_route', itinerary_id=itinerary.id) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger delete-itinerary-btn">
+                    <i class="fas fa-trash-alt me-1"></i> Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Itinerary Details -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-map-marker-alt me-2 text-info"></i> Destination</h5>
+                            <p class="lead">{{ destination.name }}, {{ destination.country }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-calendar me-2 text-info"></i> Dates</h5>
+                            <p class="lead">{{ itinerary.start_date }} to {{ itinerary.end_date }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Daily Itinerary -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="h4 mb-0"><i class="fas fa-calendar-day me-2"></i> Daily Itinerary</h2>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for day in itinerary.days %}
+                        <div class="timeline-item">
+                            <h3 class="h5 mb-3">Day {{ loop.index }}: {{ day.date }}</h3>
+                            
+                            {% if day.activities %}
+                            <div class="ms-4">
+                                {% for activity in day.activities %}
+                                <div class="activity-item">
+                                    <div class="d-flex justify-content-between">
+                                        <h4 class="h6 mb-1">{{ activity.name }}</h4>
+                                        {% if activity.time %}
+                                        <span class="badge bg-secondary">{{ activity.time }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if activity.notes %}
+                                    <p class="mb-0 small text-muted">{{ activity.notes }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-light ms-4">
+                                <i class="fas fa-info-circle me-2"></i> No activities planned for this day
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Weather Widget -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="h4 mb-0"><i class="fas fa-cloud-sun me-2"></i> Current Weather</h2>
+                </div>
+                <div class="card-body">
+                    {% if weather %}
+                    <div class="weather-widget">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <img src="https://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon" class="weather-icon">
+                            </div>
+                            <div>
+                                <h3 class="h4 mb-0">{{ weather.temp }}°C</h3>
+                                <p class="mb-0 text-capitalize">{{ weather.description }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <p><i class="fas fa-tint me-2"></i> Humidity: {{ weather.humidity }}%</p>
+                            </div>
+                            <div class="col-6">
+                                <p><i class="fas fa-wind me-2"></i> Wind: {{ weather.wind_speed }} m/s</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Weather information unavailable.
+                    </div>
+                    {% endif %}
+                    <p class="small text-muted">Note: This shows current weather. Check forecast closer to your travel dates.</p>
+                </div>
+            </div>
+            
+            <!-- Destination Highlights -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="h4 mb-0"><i class="fas fa-star me-2"></i> Destination Highlights</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for attraction in destination.attractions %}
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-landmark me-2 text-info"></i> {{ attraction }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="mt-3">
+                        <a href="{{ url_for('destination_detail', destination_id=destination.id) }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-info-circle me-1"></i> View Destination Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Travel Checklist -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="h4 mb-0"><i class="fas fa-tasks me-2"></i> Travel Checklist</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Remember to prepare these essentials before your trip:
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-passport me-2 text-info"></i> Check passport validity
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-plane me-2 text-info"></i> Confirm flight bookings
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-hotel me-2 text-info"></i> Secure accommodations
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-shuttle-van me-2 text-info"></i> Arrange transportation
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="fas fa-medkit me-2 text-info"></i> Pack essential medications
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Itineraries List View -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-route me-2"></i> My Itineraries</h1>
+        <a href="{{ url_for('create_itinerary') }}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i> Create New Itinerary
+        </a>
+    </div>
+    
+    {% if itineraries %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for itinerary in itineraries %}
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ itinerary.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        <i class="fas fa-map-marker-alt me-1"></i> {{ itinerary.destination_name }}
+                    </h6>
+                    <p class="card-text">
+                        <i class="fas fa-calendar me-1"></i> {{ itinerary.start_date }} to {{ itinerary.end_date }}
+                    </p>
+                    <p class="card-text">
+                        <i class="fas fa-calendar-day me-1"></i> {{ itinerary.days|length }} days planned
+                    </p>
+                    <div class="d-flex">
+                        <a href="{{ url_for('view_itinerary', itinerary_id=itinerary.id) }}" class="btn btn-primary me-2">
+                            <i class="fas fa-eye me-1"></i> View
+                        </a>
+                        <a href="{{ url_for('edit_itinerary', itinerary_id=itinerary.id) }}" class="btn btn-secondary me-2">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                        <form action="{{ url_for('delete_itinerary_route', itinerary_id=itinerary.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-danger delete-itinerary-btn">
+                                <i class="fas fa-trash-alt me-1"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> You don't have any itineraries yet. Create your first trip plan!
+    </div>
+    <div class="text-center my-5">
+        <div class="display-1 text-muted mb-4">
+            <i class="fas fa-suitcase"></i>
+        </div>
+        <h3>Ready to plan your adventure?</h3>
+        <p class="lead mb-4">Create your first itinerary and start organizing your dream trip.</p>
+        <a href="{{ url_for('create_itinerary') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-plus me-2"></i> Create New Itinerary
+        </a>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "category": "Packing",
+    "title": "Essential Packing Tips",
+    "tips": [
+      "Roll clothes instead of folding to save space and prevent wrinkles",
+      "Pack a small first-aid kit with basic medications",
+      "Bring a universal power adapter for international travel",
+      "Use packing cubes to organize your suitcase",
+      "Always pack a change of clothes in your carry-on"
+    ]
+  },
+  {
+    "id": "2",
+    "category": "Safety",
+    "title": "Staying Safe While Traveling",
+    "tips": [
+      "Keep digital copies of important documents",
+      "Share your itinerary with a trusted friend or family member",
+      "Research common scams at your destination",
+      "Register with your country's travel advisory program",
+      "Know basic phrases in the local language, especially for emergencies"
+    ]
+  },
+  {
+    "id": "3",
+    "category": "Budget",
+    "title": "Money-Saving Travel Tips",
+    "tips": [
+      "Book flights in incognito mode to avoid price increases",
+      "Use local transportation instead of taxis when possible",
+      "Eat where the locals eat for better prices and authentic food",
+      "Consider accommodations with kitchen access to save on meals",
+      "Research free activities and attractions at your destination"
+    ]
+  },
+  {
+    "id": "4",
+    "category": "Health",
+    "title": "Staying Healthy While Traveling",
+    "tips": [
+      "Stay hydrated, especially on flights",
+      "Bring sanitizing wipes for high-touch surfaces",
+      "Check if you need vaccines before traveling",
+      "Know how to say 'I have an allergy' in the local language",
+      "Carry probiotics to help with digestive issues"
+    ]
+  }
+]
