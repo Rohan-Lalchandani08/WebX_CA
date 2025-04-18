@@ -8,8 +8,11 @@
     "end_date": "2025-04-23",
     "budget": null,
     "notes": null,
-    "created_at": "2025-04-17T07:09:00.563616",
+    "created_at": "2025-04-18T11:37:21.281043",
     "is_public": false,
-    "companions": []
+    "companions": [],
+    "shared_with": [],
+    "sharing_enabled": false,
+    "budget_shared": false
   }
 ]
