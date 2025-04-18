@@ -339,7 +339,20 @@ def profile():
         return redirect(url_for('login'))
         
     # Get user's trips
-    user_trips = get_user_trips(current_user.id)
+    user_trips = get_user_trips(current_user.id) or []
+    
+    # Initialize counts
+    trips_count = len(user_trips)
+    reviews_count = len(get_user_reviews(current_user.id) or [])
+    countries_count = len(set(trip.get('country', '') for trip in user_trips))
+    
+    # Get upcoming trips
+    upcoming_trips = []
+    for trip in user_trips:
+        if trip.get('start_date'):
+            upcoming_trips.append(trip)
+    
+    activities = []  # Placeholder for recent activities
     
     # Calculate trip stats
     trips_count = len(user_trips)
