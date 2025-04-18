@@ -537,19 +537,20 @@ def add_expense():
                 amount=form.amount.data,
                 category=form.category.data,
                 description=form.description.data,
-                date=datetime.utcnow(),
+                date=form.date.data,
                 currency=form.currency.data or 'USD'
             )
             # Save to database
-            create_expense(expense)
-            flash('Expense added successfully', 'success')
+            if create_expense(expense):
+                flash('Expense added successfully', 'success')
+            else:
+                flash('Failed to save expense', 'danger')
         except Exception as e:
             flash(f'Error adding expense: {str(e)}', 'danger')
-        
-        flash('Expense added successfully', 'success')
         return redirect(url_for('dashboard'))
     
-    flash('Error adding expense. Please check your inputs.', 'danger')
+    for field, errors in form.errors.items():
+        flash(f'{field}: {", ".join(errors)}', 'danger')
     return redirect(url_for('dashboard'))
 
 # Travel Journal Routes
