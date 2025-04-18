@@ -334,6 +334,10 @@ def reset_password(token):
 @app.route('/profile')
 @login_required
 def profile():
+    if not current_user.is_authenticated:
+        flash('Please login to view your profile', 'danger')
+        return redirect(url_for('login'))
+        
     # Get user's trips
     user_trips = get_user_trips(current_user.id)
     
