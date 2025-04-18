@@ -206,6 +206,47 @@
           </button>
         </div>
         <div class="card-body">
+          <!-- Add Expense Modal -->
+          <div class="modal fade" id="addExpenseModal" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Add Expense</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <form method="POST" action="{{ url_for('add_expense') }}">
+                    {{ expense_form.csrf_token }}
+                    {{ expense_form.trip_id(value=request.args.get('trip_id', '')) }}
+                    <div class="mb-3">
+                      <label class="form-label">Amount</label>
+                      {{ expense_form.amount(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Category</label>
+                      {{ expense_form.category(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Description</label>
+                      {{ expense_form.description(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Date</label>
+                      {{ expense_form.date(class="form-control", type="date") }}
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">Currency</label>
+                      {{ expense_form.currency(class="form-control") }}
+                    </div>
+                    <div class="text-end">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-primary">Add Expense</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
           {% if recent_expenses %}
             <div class="table-responsive">
               <table class="table table-sm">
