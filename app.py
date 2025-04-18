@@ -398,6 +398,39 @@ def profile():
                           upcoming_trips=upcoming_trips,
                           activities=activities)
 
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        
+        if username and email:
+            current_user.username = username
+            current_user.email = email
+            update_user(current_user)
+            flash('Profile updated successfully', 'success')
+            return redirect(url_for('profile'))
+    
+    return render_template('profile.html')
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        
+        if current_user.check_password(current_password):
+            current_user.set_password(new_password)
+            update_user(current_user)
+            flash('Password changed successfully', 'success')
+            return redirect(url_for('profile'))
+        else:
+            flash('Current password is incorrect', 'danger')
+    
+    return render_template('profile.html')
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
