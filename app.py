@@ -540,9 +540,11 @@ def add_expense():
                 date=datetime.utcnow(),
                 currency=form.currency.data or 'USD'
             )
-        
-        # Save to database
-        create_expense(expense)
+            # Save to database
+            create_expense(expense)
+            flash('Expense added successfully', 'success')
+        except Exception as e:
+            flash(f'Error adding expense: {str(e)}', 'danger')
         
         flash('Expense added successfully', 'success')
         return redirect(url_for('dashboard'))
