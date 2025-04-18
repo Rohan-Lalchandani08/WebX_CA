@@ -140,6 +140,12 @@ def delete_trip(trip_id):
     return trip_result.deleted_count > 0
 
 # Itinerary Day functions
+def get_trip_by_id(trip_id):
+    trip = mongo.db.trips.find_one({"_id": trip_id})
+    if trip:
+        trip['id'] = str(trip['_id'])
+    return trip
+
 def get_trip_days(trip_id):
     days = list(mongo.db.itinerary_days.find({"trip_id": trip_id}))
     # Sort by date

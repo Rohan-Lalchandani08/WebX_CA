@@ -529,24 +529,17 @@ def dashboard():
 def add_expense():
     form = ExpenseForm()
     if form.validate_on_submit():
-        trip_id = request.form.get('trip_id')
-        trip = get_trip_by_id(trip_id)
-        
-        # Check if user has access to add expenses
-        if not trip.get('budget_shared') and trip.get('user_id') != current_user.id:
-            flash('You do not have permission to add expenses to this trip', 'danger')
-            return redirect(url_for('dashboard'))
-            
-        # Create expense object with user tracking
-        expense = Expense(
-            trip_id=trip_id,
-            user_id=current_user.id,
-            amount=form.amount.data,
-            category=form.category.data,
-            description=form.description.data,
-            date=form.date.data,
-            currency=form.currency.data
-        )
+        try:
+            # Create expense object
+            expense = Expense(
+                trip_id=form.trip_id.data,
+                user_id=current_user.id,
+                amount=form.amount.data,
+                category=form.category.data,
+                description=form.description.data,
+                date=datetime.utcnow(),
+                currency=form.currency.data or 'USD'
+            )
         
         # Save to database
         create_expense(expense)

@@ -48,6 +48,7 @@ class ActivityForm(FlaskForm):
     cost = DecimalField('Cost', validators=[Optional()])
 
 class ExpenseForm(FlaskForm):
+    trip_id = HiddenField('Trip ID', validators=[DataRequired()])
     amount = DecimalField('Amount', validators=[DataRequired()])
     category = SelectField('Category', choices=[
         ('accommodation', 'Accommodation'),
